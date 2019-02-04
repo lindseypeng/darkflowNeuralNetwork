@@ -29,7 +29,9 @@ numoffiles=end-start+1
 # whether cropping is being performed or not
 refPt = []
 cropping = False
-#records= pd.DataFrame()
+########################################################
+####MUST CROP FROM TOP LEFT TO BOTTOM RIGHT###
+############################################
 def click_and_crop(event, x, y, flags, param): 
     global refPt, cropping
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -49,7 +51,7 @@ particle_truncated=0
 particle_difficult=0
 for f in rangenum:
     index=0
-    f2="{:01d}".format(f+1)
+    f2="{:01d}".format(f+start)
     filename=(placeread.format((f2)))
     print("this is file" + filename)
     if os.path.exists(filename)==False:
@@ -69,16 +71,17 @@ for f in rangenum:
             if key == ord("r"):
                 image = clone.copy()
             elif key == ord("c"):
-                xmin = refPt[0][0]
-                xmax = refPt[1][0]
-                ymin = refPt[0][1]
-                ymax = refPt[1][1]
-                classification = input('Enter your classification name: ')
-                my_file.write("\n\t<object>\n\t\t<name>{}</name>\n\t\t<pose>{}</pose>\n\t\t<truncated>{}</truncated>\n\t\t<difficult>{}</difficult>\n\t\t<bndbox>\n\t\t\t<xmin>{}</xmin>\n\t\t\t<ymin>{}</ymin>\n\t\t\t<xmax>{}</xmax>\n\t\t\t<ymax>{}</ymax>\n\t\t</bndbox>\n\t</object>".format(classification, particle_pose, particle_truncated, particle_difficult, xmin, ymin, xmax, ymax))
                 if len(refPt) == 2:
-                    roi = clone[refPt[0][1]:refPt[1][1], refPt[0][0]:refPt[1][0]]
-                    index=index+1
-                    cv2.imwrite(crop+'/frame{}number{}.png'.format(f2,index),roi)##optional if you want to save your cropped image
+                    xmin = refPt[0][0]
+                    xmax = refPt[1][0]
+                    ymin = refPt[0][1]
+                    ymax = refPt[1][1]
+                    if (ymax-ymin)>0 and (xmax-xmin)>0:
+                        classification = input('Enter your classification name: ')
+                        my_file.write("\n\t<object>\n\t\t<name>{}</name>\n\t\t<pose>{}</pose>\n\t\t<truncated>{}</truncated>\n\t\t<difficult>{}</difficult>\n\t\t<bndbox>\n\t\t\t<xmin>{}</xmin>\n\t\t\t<ymin>{}</ymin>\n\t\t\t<xmax>{}</xmax>\n\t\t\t<ymax>{}</ymax>\n\t\t</bndbox>\n\t</object>".format(classification, particle_pose, particle_truncated, particle_difficult, xmin, ymin, xmax, ymax))
+                        roi = clone[refPt[0][1]:refPt[1][1], refPt[0][0]:refPt[1][0]]
+                        index=index+1
+                        cv2.imwrite(crop+'/frame{}number{}.png'.format(f2,index),roi)##optional if you want to save your cropped image
 #        		cv2.imshow("ROI", roi)##optional if you want to see your cropped image
 #        		cv2.waitKey(0)
         	## keep looping until the 'q' key is pressed
@@ -89,3 +92,4 @@ for f in rangenum:
     
 
 cv2.destroyAllWindows()
+
