@@ -6,6 +6,14 @@ Created on Sun Feb  3 20:58:05 2019
 """
 
 
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Feb  3 20:58:05 2019
+
+@author: alinsi
+"""
+
+
 import cv2 
 import os
 import argparse
@@ -15,6 +23,7 @@ ap.add_argument("-o", "--output", required=True,help="path to output annotations
 ap.add_argument("-s", "--start", required=True,help="start frame")
 ap.add_argument("-e", "--end", required=True,help="end frame")
 ap.add_argument("-c", "--crop", required=False,help="path to cropped image")
+
 args = vars(ap.parse_args())
 # 
 ## load the input image from disk
@@ -43,7 +52,7 @@ def click_and_crop(event, x, y, flags, param):
 		# draw a rectangle around the region of interest
         cv2.rectangle(image, refPt[0], refPt[1], (0, 255, 0), 2)
         cv2.imshow("image", image)
-
+print("Crop from Top Left to Bottom Right, Press 'r' to refresh image, Press 'c' to crop, Press 'q' to go to next image or end")
 rangenum=range(numoffiles)
 placeread=folderread+"/{}.jpg"
 particle_pose=0
@@ -53,6 +62,7 @@ for f in rangenum:
     index=0
     f2="{:01d}".format(f+start)
     filename=(placeread.format((f2)))
+    filename2=str(f2)+".jpg"
     print("this is file" + filename)
     if os.path.exists(filename)==False:
         print ("file dosnt exist {}".format(f2))        
@@ -61,7 +71,7 @@ for f in rangenum:
         image = cv2.imread(filename)
         (h, w, d) = image.shape
         my_file=open(foldersave+"/{}.xml".format(f2),"w+")
-        my_file.write("<annotation>\n\t<folder>{}</folder>\n\t<filename>{}</filename>\n\t<size>\n\t\t<width>{}</width>\n\t\t<height>{}</height>\n\t\t<depth>{}</depth>\n\t</size>\n\t<segmented>0</segmented>".format(folderread,filename, w, h, d))
+        my_file.write("<annotation>\n\t<folder>{}</folder>\n\t<filename>{}</filename>\n\t<size>\n\t\t<width>{}</width>\n\t\t<height>{}</height>\n\t\t<depth>{}</depth>\n\t</size>\n\t<segmented>0</segmented>".format(folderread,filename2, w, h, d))
         clone = image.copy()
         cv2.namedWindow("image")
         cv2.setMouseCallback("image", click_and_crop)
@@ -81,7 +91,9 @@ for f in rangenum:
                         my_file.write("\n\t<object>\n\t\t<name>{}</name>\n\t\t<pose>{}</pose>\n\t\t<truncated>{}</truncated>\n\t\t<difficult>{}</difficult>\n\t\t<bndbox>\n\t\t\t<xmin>{}</xmin>\n\t\t\t<ymin>{}</ymin>\n\t\t\t<xmax>{}</xmax>\n\t\t\t<ymax>{}</ymax>\n\t\t</bndbox>\n\t</object>".format(classification, particle_pose, particle_truncated, particle_difficult, xmin, ymin, xmax, ymax))
                         roi = clone[refPt[0][1]:refPt[1][1], refPt[0][0]:refPt[1][0]]
                         index=index+1
-                        cv2.imwrite(crop+'/frame{}number{}.png'.format(f2,index),roi)##optional if you want to save your cropped image
+                        cv2.imwrite(crop+'/frame{}index{}class{}.png'.format(f2,index,classification),roi)##optional if you want to save your cropped image
+                    else:
+                        print("cropping not done properly,press r to refresh")
 #        		cv2.imshow("ROI", roi)##optional if you want to see your cropped image
 #        		cv2.waitKey(0)
         	## keep looping until the 'q' key is pressed
@@ -92,4 +104,3 @@ for f in rangenum:
     
 
 cv2.destroyAllWindows()
-
